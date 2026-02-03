@@ -1,4 +1,5 @@
 use candle_core::{Device, Tensor};
+mod model; // tells Rust: there is a model.rs file
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let device = Device::Cpu;
