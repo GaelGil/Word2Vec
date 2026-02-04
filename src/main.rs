@@ -1,13 +1,17 @@
-use candle_core::{Device, Tensor};
-mod model; // tells Rust: there is a model.rs file
+mod model;
+use candle_core::{DType, Device, Tensor};
+use candle_nn::VarBuilder;
+use model::Model;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let device = Device::Cpu;
 
-    let a = Tensor::randn(0f32, 1., (2, 3), &device)?;
-    let b = Tensor::randn(0f32, 1., (3, 4), &device)?;
+    let vb = VarBuilder::from_dtype(DType::F32, &device);
+    let model = Model::new(vb)?;
 
-    let c = a.matmul(&b)?;
-    println!("{c}");
+    let x = Tensor::randn(0f32, 1f32, (4, 10), &device)?;
+
+    let y = model.forward(&x)?;
+    println!("{y}");
     Ok(())
 }
