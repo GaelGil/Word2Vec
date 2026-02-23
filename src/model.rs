@@ -1,29 +1,39 @@
-use candle_core::{Result, Tensor};
-use candle_nn::{Embedding, Linear, Module, VarBuilder};
+use candle_core::Result;
+use candle_nn::{embedding, Embedding, VarBuilder};
 
-pub struct Model {
-    embeddings: Embedding,
-    linear1: Linear,
-    linear2: Linear,
+pub struct CbowModel {
+    target_embeddings: Embedding,
+    context_embeddings: Embedding,
+    vocab_size: usize,
+    embedding_dim: usize,
 }
 
-impl Model {
-    pub fn new(vocab_size: usize, window_size: usize, vb: VarBuilder) -> Result<Self> {
-        let embeddings = candle_nn::embedding(vocab_size, 100, vb.pp("embeddings"))?;
-        let linear1 = candle_nn::linear(100, window_size, vb.pp("linear1"))?;
-        let linear2 = candle_nn::linear(window_size, vocab_size, vb.pp("linear2"))?;
+impl CbowModel {
+    pub fn new(vocab_size: usize, embedding_dim: usize, vb: VarBuilder) -> Result<Self> {
+        let target_embeddings = embedding(vocab_size, embedding_dim, vb.pp("target_embeddings"))?;
+        let context_embeddings = embedding(vocab_size, embedding_dim, vb.pp("context_embeddings"))?;
+
         Ok(Self {
-            embeddings,
-            linear1,
-            linear2,
+            target_embeddings,
+            context_embeddings,
+            vocab_size,
+            embedding_dim,
         })
     }
-}
 
-impl Module for Model {
-    fn forward(&self, x: &Tensor) -> Result<Tensor> {
-        let x = self.embeddings.forward(x)?;
-        let x = self.linear1.forward(&x)?;
-        self.linear2.forward(&x)
+    pub fn get_target_embeddings(&self) -> &Embedding {
+        &self.target_embeddings
+    }
+
+    pub fn get_context_embeddings(&self) -> &Embedding {
+        &self.context_embeddings
+    }
+
+    pub fn vocab_size(&self) -> usize {
+        self.vocab_size
+    }
+
+    pub fn embedding_dim(&self) -> usize {
+        self.embedding_dim
     }
 }
