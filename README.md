@@ -1,1 +1,1 @@
-# friendly-octo-carnival
+A word2vec implementation in rust.
