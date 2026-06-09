@@ -45,6 +45,9 @@ impl Vocab {
         let mut word_counts: HashMap<String, u64> = HashMap::new();
         // for each token in tokens list
         for token in &tokens {
+            // check if token exists in hashmap
+            // if it is not insert the pair "token": 0
+            // .or_insert(0) returns refernce to
             *word_counts.entry(token.clone()).or_insert(0) += 1;
         }
 
