@@ -1,6 +1,6 @@
 use crate::vocab::Vocab;
 use candle_core::{DType, Device, Result, Tensor};
-use candle_nn::{embedding, AdamW, Embedding, Module, Optimizer, VarBuilder, VarMap};
+use candle_nn::{AdamW, Embedding, Module, Optimizer, VarBuilder, VarMap, embedding};
 use rand::Rng;
 
 pub struct Trainer {

@@ -3,6 +3,10 @@ use std::path::Path;
 
 #[derive(Clone)]
 pub struct Vocab {
+    // The vocab for our corpus
+    // word_to_id: dictionary for word to id {"str": id}
+    // id_to_word: map a integer to a word id_to_word[id] = "str"
+    // word_to_id: word counts {"str": frequency}
     pub word_to_id: HashMap<String, u32>,
     pub id_to_word: Vec<String>,
     pub word_counts: HashMap<String, u64>,
@@ -10,34 +14,50 @@ pub struct Vocab {
 
 impl Vocab {
     pub fn new() -> Self {
-        Self {
+        // define and return a empty vocab
+        return Self {
             word_to_id: HashMap::new(),
             id_to_word: Vec::new(),
             word_counts: HashMap::new(),
-        }
+        };
     }
 
     pub fn build_from_text<P: AsRef<Path>>(
         path: P,
         min_count: u32,
     ) -> Result<Self, Box<dyn std::error::Error>> {
+        // build the vocab from a corpus
+        // path is the file path
+        // min_count min times a word for us to keep it in the vocab
+
+        // read the file
+        // ? says if reading file fails we return the error in that instant
         let text = std::fs::read_to_string(path.as_ref())?;
+        // get tokens into array of str from the file we read
         let tokens = text
             .to_lowercase()
             .split_whitespace()
             .map(|s| s.to_string())
             .collect::<Vec<_>>();
 
+        // count unique tokens
+        // first we define a updatable word_count dictionary
         let mut word_counts: HashMap<String, u64> = HashMap::new();
+        // for each token in tokens list
         for token in &tokens {
             *word_counts.entry(token.clone()).or_insert(0) += 1;
         }
 
+        // remove words whos word count is below min_count
         word_counts.retain(|_, count| *count >= min_count as u64);
 
+        // create empty vocab
         let mut vocab = Self::new();
+        // insert word "<unk>" with id = 0
         vocab.word_to_id.insert("<unk>".to_string(), 0);
+        // insert word "<unk>" into first postion of list
         vocab.id_to_word.push("<unk>".to_string());
+        // insert record {"unk": 0} into dictionary
         vocab.word_counts.insert("<unk>".to_string(), 0);
 
         for (word, count) in word_counts {
@@ -47,7 +67,7 @@ impl Vocab {
             vocab.word_counts.insert(word.clone(), count);
         }
 
-        Ok(vocab)
+        return Ok(vocab);
     }
 
     pub fn build_from_tokens(tokens: &[String], min_count: u32) -> Self {
@@ -78,17 +98,18 @@ impl Vocab {
     }
 
     pub fn get_word(&self, id: u32) -> &str {
-        self.id_to_word
+        return self
+            .id_to_word
             .get(id as usize)
             .map(|s| s.as_str())
-            .unwrap_or("<unk>")
+            .unwrap_or("<unk>");
     }
 
     pub fn size(&self) -> usize {
-        self.id_to_word.len()
+        return self.id_to_word.len();
     }
 
     pub fn total_words(&self) -> u64 {
-        self.word_counts.values().sum()
+        return self.word_counts.values().sum();
     }
 }
