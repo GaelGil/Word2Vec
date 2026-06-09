@@ -103,7 +103,7 @@ fn evaluate_model(
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let data_path = "data.txt";
+    let data_path = "./data/data.txt";
     let embedding_dim = 100;
     let window_size = 2;
     let neg_samples = 5;
