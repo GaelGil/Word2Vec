@@ -1,14 +1,15 @@
+use crate::model::CbowModel;
 use crate::vocab::Vocab;
 use candle_core::{DType, Device, Result, Tensor};
-use candle_nn::{AdamW, Embedding, Module, Optimizer, VarBuilder, VarMap, embedding};
+use candle_nn::{AdamW, Embedding, Module, Optimizer, VarBuilder, VarMap};
 use rand::Rng;
 
 pub struct Trainer {
     vocab: Vocab,
-    target_embeddings: Embedding,
-    context_embeddings: Embedding,
+    model: CbowModel,
     var_map: VarMap,
     optimizer: AdamW,
+    embedding_dim: usize,
     window_size: usize,
     neg_samples: usize,
     device: Device,
@@ -17,6 +18,7 @@ pub struct Trainer {
 impl Trainer {
     pub fn new(
         vocab: Vocab,
+        model: CbowModel,
         embedding_dim: usize,
         window_size: usize,
         neg_samples: usize,
@@ -24,20 +26,15 @@ impl Trainer {
     ) -> Result<Self> {
         let device = Device::Cpu;
         let var_map = VarMap::new();
-        let vb = VarBuilder::from_varmap(&var_map, DType::F32, &device);
-
-        let target_embeddings = embedding(vocab.size(), embedding_dim, vb.pp("target_embeddings"))?;
-        let context_embeddings =
-            embedding(vocab.size(), embedding_dim, vb.pp("context_embeddings"))?;
 
         let optimizer = AdamW::new_lr(var_map.all_vars(), learning_rate as f64)?;
 
         Ok(Self {
             vocab,
-            target_embeddings,
-            context_embeddings,
+            model,
             var_map,
             optimizer,
+            embedding_dim,
             window_size,
             neg_samples,
             device,

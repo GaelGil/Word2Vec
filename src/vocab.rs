@@ -97,10 +97,12 @@ impl Vocab {
     }
 
     pub fn get_id(&self, word: &str) -> u32 {
+        // get the id of a word
         self.word_to_id.get(word).copied().unwrap_or(0)
     }
 
     pub fn get_word(&self, id: u32) -> &str {
+        // get word from id
         return self
             .id_to_word
             .get(id as usize)
