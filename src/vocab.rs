@@ -6,7 +6,7 @@ pub struct Vocab {
     // The vocab for our corpus
     // word_to_id: dictionary for word to id {"str": id}
     // id_to_word: map a integer to a word id_to_word[id] = "str"
-    // word_to_id: word counts {"str": frequency}
+    // word_counts: word counts {"str": frequency}
     pub word_to_id: HashMap<String, u32>,
     pub id_to_word: Vec<String>,
     pub word_counts: HashMap<String, u64>,
