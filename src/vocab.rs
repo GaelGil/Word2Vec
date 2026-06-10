@@ -7,9 +7,9 @@ pub struct Vocab {
     // word_to_id: dictionary for word to id {"str": id}
     // id_to_word: map a integer to a word id_to_word[id] = "str"
     // word_counts: word counts {"str": frequency}
-    pub word_to_id: HashMap<String, u32>,
-    pub id_to_word: Vec<String>,
-    pub word_counts: HashMap<String, u64>,
+    word_to_id: HashMap<String, u32>,
+    id_to_word: Vec<String>,
+    word_counts: HashMap<String, u64>,
 }
 
 impl Vocab {
@@ -34,11 +34,7 @@ impl Vocab {
         // ? says if reading file fails we return the error in that instant
         let text = std::fs::read_to_string(path.as_ref())?;
         // get tokens into array of str from the file we read
-        let tokens = text
-            .to_lowercase()
-            .split_whitespace()
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>();
+        let tokens = self.tokenize(text);
 
         // count unique tokens
         // first we define a updatable word_count dictionary
@@ -96,6 +92,14 @@ impl Vocab {
         vocab
     }
 
+    pub fn tokenize(self, text: &str) -> Vec<String> {
+        return text
+            .to_lowercase()
+            .split_whitespace()
+            .map(|s| s.to_string())
+            .collect();
+    }
+
     pub fn get_id(&self, word: &str) -> u32 {
         // get the id of a word
         self.word_to_id.get(word).copied().unwrap_or(0)
@@ -108,6 +112,10 @@ impl Vocab {
             .get(id as usize)
             .map(|s| s.as_str())
             .unwrap_or("<unk>");
+    }
+
+    pub fn word_count(&self, word: &str) -> u64 {
+        return self.word_counts.get(word).copied().unwrap_or(0);
     }
 
     pub fn size(&self) -> usize {

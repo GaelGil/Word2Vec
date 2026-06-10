@@ -3,7 +3,7 @@ use candle_nn::{Embedding, Module, VarBuilder, embedding};
 
 pub struct CbowModel {
     // Continuous Bag of Words Model
-    // target_embeddigs: embeddings for the target/center words
+    // target_embeddings: embeddings for the target/center words
     // context_embeddings: embeddings for the surrounding words
     // vocab_size: The size of the vocab
     // embedding_dim: The embedding dimension
@@ -28,25 +28,33 @@ impl CbowModel {
         });
     }
 
-    pub fn get_target_embeddings(&self, target_ids: &Tensor) -> Result<Tensor> {
+    pub fn lookup_target_embeddings(&self, target_ids: &Tensor) -> Result<Tensor> {
         return self.target_embeddings.forward(target_ids);
     }
 
-    pub fn get_context_embeddings(&self, context_ids: &Tensor) -> Result<Tensor> {
+    pub fn lookup_context_embeddings(&self, context_ids: &Tensor) -> Result<Tensor> {
         return self.context_embeddings.forward(context_ids);
     }
 
     pub fn context_mean(&self, context_ids: &Tensor) -> Result<Tensor> {
-        let context_embeds = self.get_context_embeddings(context_ids)?;
+        let context_embeds = self.lookup_context_embeddings(context_ids)?;
         return context_embeds.mean_keepdim(0);
     }
 
     pub fn score(&self, target_ids: &Tensor, context_ids: &Tensor) -> Result<Tensor> {
-        let target_embed = self.get_target_embeddings(target_ids)?;
-        let context_mean = self.get_context_mean(context_ids)?;
+        let target_embed = self.lookup_target_embeddings(target_ids)?;
+        let context_mean = self.context_mean(context_ids)?;
         let multiplied = (&target_embed * &context_mean)?;
         let score = multiplied.sum_keepdim(1)?;
         return Ok(score);
+    }
+
+    pub fn target_embedding_table(&self) -> &Embedding {
+        return &self.target_embeddings;
+    }
+
+    pub fn context_embedding_table(&self) -> &Embedding {
+        return &self.context_embeddings;
     }
 
     pub fn vocab_size(&self) -> usize {
