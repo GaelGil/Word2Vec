@@ -34,7 +34,7 @@ impl Vocab {
         // ? says if reading file fails we return the error in that instant
         let text = std::fs::read_to_string(path.as_ref())?;
         // get tokens into array of str from the file we read
-        let tokens = self.tokenize(text);
+        let tokens = self.tokenize(&text);
 
         // count unique tokens
         // first we define a updatable word_count dictionary
@@ -92,7 +92,7 @@ impl Vocab {
         vocab
     }
 
-    pub fn tokenize(self, text: &str) -> Vec<String> {
+    pub fn tokenize(&self, text: &str) -> Vec<String> {
         return text
             .to_lowercase()
             .split_whitespace()

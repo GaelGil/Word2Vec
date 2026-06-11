@@ -9,7 +9,6 @@ pub struct Trainer {
     model: CbowModel,
     var_map: VarMap,
     optimizer: AdamW,
-    embedding_dim: usize,
     window_size: usize,
     neg_samples: usize,
     device: Device,
@@ -18,7 +17,6 @@ pub struct Trainer {
 impl Trainer {
     pub fn new(
         vocab: Vocab,
-        model: CbowModel,
         embedding_dim: usize,
         window_size: usize,
         neg_samples: usize,
@@ -26,7 +24,9 @@ impl Trainer {
     ) -> Result<Self> {
         let device = Device::Cpu;
         let var_map = VarMap::new();
+        let vb = VarBuilder::from_varmap(&var_map, DType::F32, &device);
 
+        let model = CbowModel::new(vocab.size(), embedding_dim, vb)?;
         let optimizer = AdamW::new_lr(var_map.all_vars(), learning_rate as f64)?;
 
         Ok(Self {
@@ -34,7 +34,6 @@ impl Trainer {
             model,
             var_map,
             optimizer,
-            embedding_dim,
             window_size,
             neg_samples,
             device,
@@ -66,10 +65,8 @@ impl Trainer {
             let target_tensor = Tensor::new(&[target], &self.device)?;
             let context_tensor = Tensor::new(context.as_slice(), &self.device)?;
 
-            let target_embed = self.target_embeddings.forward(&target_tensor)?;
-            let context_embeds = self.context_embeddings.forward(&context_tensor)?;
-
-            let context_mean = context_embeds.mean_keepdim(0)?;
+            let pos_score = self.model.score(&target_tensor, &context_ids)?;
+            let poss_loss = context_embeds.mean_keepdim(0)?;
 
             let target_vec = target_embed.to_vec2::<f32>()?;
             let context_vec = context_mean.to_vec2::<f32>()?;
@@ -132,19 +129,19 @@ impl Trainer {
     }
 
     pub fn get_embeddings(&self) -> &Embedding {
-        &self.target_embeddings
+        return self.model.target_embedding_table();
     }
 
     pub fn save(&self, path: &str) -> Result<()> {
-        self.var_map.save(path)
+        return self.var_map.save(path);
     }
 
     pub fn load(&mut self, path: &str) -> Result<()> {
-        self.var_map.load(path)
+        return self.var_map.load(path);
     }
 
     pub fn vocab(&self) -> &Vocab {
-        &self.vocab
+        return &self.vocab;
     }
 }
 
