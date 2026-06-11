@@ -5,10 +5,10 @@ use candle_nn::{AdamW, Embedding, Module, Optimizer, VarBuilder, VarMap};
 use rand::Rng;
 
 pub struct Trainer {
-    // Continuous Bag of Words Model
-    // target_embeddings: embeddings for the target/center words
-    // context_embeddings: embeddings for the surrounding words
-    // vocab_size: The size of the vocab
+    // Trainser
+    // vocab: The vocabs
+    // model: The cbow model instance
+    // optimizer: The optimizer
     // embedding_dim: The embedding dimension
     vocab: Vocab,
     model: CbowModel,
